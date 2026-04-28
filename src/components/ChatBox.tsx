@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { Message } from "@/types/chat";
 import MessageBubble from "./MessageBubble";
@@ -9,24 +9,37 @@ import ChatInput from "./ChatInput";
 export default function ChatBox() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
 
   const sendMessage = async (input: string) => {
-    if (!input) return;
+    if (!input.trim()) return;
 
     const updated = [...messages, { role: "user" as const, content: input }];
     setMessages(updated);
     setLoading(true);
 
-    const res = await axios.post("/api/chat", {
-      messages: updated,
-    });
+    try {
+      const res = await axios.post("/api/chat", {
+        messages: updated,
+      });
 
-    setMessages([
-      ...updated,
-      { role: "assistant" as const, content: res.data.reply },
-    ]);
-
-    setLoading(false);
+      setMessages([
+        ...updated,
+        { role: "assistant" as const, content: res.data.reply },
+      ]);
+    } catch (error) {
+      console.error("Chat error:", error);
+      setMessages([
+        ...updated,
+        { role: "assistant" as const, content: "Sorry, I encountered an error. Please try again." },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -64,6 +77,7 @@ export default function ChatBox() {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function ChatInput({
   onSend,
@@ -10,6 +10,14 @@ export default function ChatInput({
   loading: boolean;
 }) {
   const [input, setInput] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [input]);
 
   const handleSend = () => {
     if (!input.trim() || loading) return;
@@ -24,10 +32,18 @@ export default function ChatInput({
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-2 items-center">
-      <input
-        className="flex-1 border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm bg-gray-50 focus:bg-white"
+      <textarea
+        ref={textareaRef}
+        rows={1}
+        className="flex-1 border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm bg-gray-50 focus:bg-white resize-none max-h-40 overflow-y-auto"
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+          }
+        }}
         placeholder="Ask anything..."
       />
 
@@ -61,6 +77,6 @@ export default function ChatInput({
           "Send"
         )}
       </button>
-    </div>
+    </form>
   );
 }
