@@ -17,18 +17,22 @@ export default function ChatInput({
     setInput("");
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSend();
+  };
+
   return (
-    <div className="flex gap-2 items-center">
+    <form onSubmit={handleSubmit} className="flex gap-2 items-center">
       <input
         className="flex-1 border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm bg-gray-50 focus:bg-white"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSend()}
         placeholder="Ask anything..."
       />
 
       <button
-        onClick={handleSend}
+        type="submit"
         disabled={loading || !input.trim()}
         className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white p-3 rounded-xl font-medium transition-all shadow-md disabled:shadow-none flex items-center justify-center min-w-[80px]"
       >
